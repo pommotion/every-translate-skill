@@ -2,7 +2,7 @@
   "name": "every-translate",
   "version": "0.1.0",
   "private": true,
-  "description": "独立翻译 skill：从 every.to 文章生成带事实核查和终审的中文草稿",
+  "description": "通用翻译 skill：从英文文章生成带事实核查和终审的中文草稿",
   "type": "module",
   "bin": {
     "every-translate": "./scripts/every-translate.mjs"

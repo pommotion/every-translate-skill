@@ -1,29 +1,27 @@
 ---
 name: every-translate
-description: Translate and rewrite Every.to newsletter articles into publication-ready Chinese. Use for fast-track translations (skill mode) that need quick output to a review queue, or pair with the every-translate aApp for multi-round editorial refinement. Produces glossed, fact-checked, and review-pending drafts in a separate workspace — does NOT touch every.beyondmotion.net.
+description: Translate and rewrite English articles into publication-ready Chinese. Use for fast-track translations (skill mode) that need quick output to a review queue, or pair with the every-translate aApp for multi-round editorial refinement. Produces glossed, fact-checked, and review-pending drafts in a separate workspace.
 ---
 
-# Every Translate (every-translate)
+# Translate Pipeline (every-translate)
 
-独立翻译 skill，从 `every-newsletter-pipeline` 抽离而来。**两线交付**：
+通用翻译 skill，从 `every-newsletter-pipeline` 的翻译模块抽离而来，**独立于原项目**。处理任意英文文章。
 
+**两线交付**：
 - **Skill 模式**（本 skill）：单次快出 → 走事实核查 → 走终审 → 输出到 remio 草稿 + 本地副本
 - **aApp 模式**（every-translate aApp）：多轮编辑流水线 + UI 反向打磨
 
-## ⚠️ 独立原则（违反即视为污染）
+## ⚠️ 独立原则
 
 | 禁止 | 后果 |
 |---|---|
 | ❌ 修改 every-to-newsletter 仓库 | 数据污染 |
 | ❌ push 到 every.beyondmotion.net | 越权发布 |
 | ❌ 复用 `every-newsletter-pipeline/scripts/every-newsletter.mjs` | 强耦合 |
-| ❌ 复用 every-to-newsletter 仓库的 `data/articles.json` | 数据污染 |
 
-## GitHub Repositories
+## GitHub
 
-- Skill 仓库：`https://github.com/violin86318/every-translate-skill`
-- aApp 仓库：TBD（独立仓库，端口 8765，独立数据库）
-- 新网站：TBD（独立站点，本地仓库副本，**与 every.beyondmotion.net 无关**）
+- Skill 仓库：`https://github.com/pommotion/every-translate-skill`
 
 ## 实体与软链
 
@@ -33,38 +31,31 @@ description: Translate and rewrite Every.to newsletter articles into publication
 ## 核心工作流（Skill 模式）
 
 ```
-🔓 原文完整性校验
-    ↓
 📚 名词库加载（双写：remio 笔记 + glossary.json）
     ↓
-✍️ 翻译（5 步改写法，rewrite-zh.md）
+✍️ 翻译（改写式翻译，rewrite-zh.md）
     ↓
 🔎 事实核查 hook（吴查查：数据/人名/引语核对）
     ↓
 📝 终审 hook（周审稿：评分 + 硬伤修复）
     ↓
-📤 输出到 remio 草稿（标 "待审"） + 本地 content/articles/（status: draft）
-    ↓
-🛑 绝不 push 到 every.beyondmotion.net
+📤 输出到 remio 草稿 + 本地 content/output/
 ```
 
-## 命令（待 Stage 2 改造完成后实装）
+## 命令
 
 ```bash
-# 1. 健康检查
-node ~/.agents/skills/every-translate/scripts/every-translate.mjs preflight
-
-# 2. 发现最新文章
-node ~/.agents/skills/every-translate/scripts/every-translate.mjs check --limit 3
-
-# 3. 处理指定 URL（P1 测试样本：Opus 4.8）
+# 1. 处理指定 URL
 node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
-  --url "https://every.to/context-window/opus-4-8-is-smart-enough-to-get-in-your-way" \
+  --url "https://example.com/article" \
   --processor deepseek --model deepseek-v4-pro
 
-# 4. 处理最新 N 篇
+# 2. 处理最新 N 篇（every.to newsletter）
 node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
   --limit 1 --processor deepseek
+
+# 3. 健康检查
+node ~/.agents/skills/every-translate/scripts/every-translate.mjs preflight
 ```
 
 ## Hook 架构
@@ -72,10 +63,9 @@ node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
 ```
 [fetch] → [glossary.load]
        → [translate.rewrite-zh]
-       → [factcheck.吴查查]   ← 调 dedao-brain aApp 的事实核查服务
-       → [review.周审稿]     ← 调 dedao-brain aApp 的终审服务
-       → [output.remio-draft]   ← 草稿笔记
-       → [output.local]         ← 本地副本
+       → [factcheck.吴查查]
+       → [review.周审稿]
+       → [output.local]
 ```
 
 ## 名词库（双写）
@@ -93,7 +83,8 @@ node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
 
 | 维度 | 旧 skill | 新 skill |
 |---|---|---|
-| 输出 | content/articles/ + publish | content/articles/ (status: draft) + remio 待审笔记 |
+| 输入 | every.to only | **任意英文文章** |
+| 输出 | content/articles/ + publish | content/output/ + remio 待审笔记 |
 | 事实核查 | 无 | **吴查查 hook** |
 | 终审 | 无 | **周审稿 hook** |
 | 名词库 | 无 | **glossary.json + remio 双写** |
@@ -101,20 +92,10 @@ node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
 | aApp 集成 | ❌ | ✅ 多轮精修 |
 | 实体位置 | `~/.agents/skills/every-newsletter-pipeline` | `~/.agents/skills/every-translate`（独立） |
 
-## 每日自动化
-
-skill 模式不接 scheduler（用户明确："skill 处理需要快速出结果的"= 手动命令触发）。aApp 跑通后再接 scheduler。
-
 ## 实施进度
 
-- [x] **P1 Stage 1** — 建骨架、复制核心、看 CLI 代码
-- [x] **P1 Stage 2** — 删 publish、加吴查查/周审稿 hook
-- [x] **P1 Stage 3** — 加 glossary.json + remio 同步脚本
-- [x] **P1 Stage 4A** — 静态验证（undici@5 + CLI --help）
-- [x] **P1 Stage 4B** — 端到端跑通（Opus 4.8 文章：4553 字，吴查查 100 分，周审稿 86 分）
-- [x] **P1 Stage 5** — git init + commit + push GitHub
+- [x] **P1** — 翻译流水线 skill（CLI + 3 步 hook + 端到端跑通）
 - [x] **P2-1** — 名词库自动收录（extractTermsHook + glossary 0→15 术语）
 - [x] **P2-2** — remio 名词库合集创建
-- [ ] **P2-3** — SOCKS5 proxy 支持
-- [ ] **P3** — aApp 骨架
+- [x] **P3** — aApp 骨架（10 endpoint，isValid=true）
 - [ ] **P4** — scheduler + 新网站
