@@ -1,13 +1,79 @@
 {
-  "version": "2026-06-04",
-  "updatedAt": "2026-06-04T00:00:00.000Z",
-  "source": "remio://📚 Every 翻译名词库",
-  "syncDirection": "remio -> repo (one-way)",
-  "notes": [
-    "权威源：remio 笔记合集「📚 Every 翻译名词库」",
-    "本文件是镜像，由 scripts/sync-glossary.mjs（待 P2 实现）从 remio 同步生成",
-    "手工编辑本文件不会反向写到 remio（单向同步）",
-    "P1 阶段：terms 数组保持为空，由真实翻译驱动收录"
-  ],
-  "terms": []
+  "terms": [
+    {
+      "english": "Opus 4.8",
+      "chinese": "Opus 4.8",
+      "category": "product"
+    },
+    {
+      "english": "Dan Shipper",
+      "chinese": "丹·希珀",
+      "category": "person"
+    },
+    {
+      "english": "Matt Colyer",
+      "chinese": "马特·科利尔",
+      "category": "person"
+    },
+    {
+      "english": "Figma",
+      "chinese": "Figma",
+      "category": "org"
+    },
+    {
+      "english": "Anthropic",
+      "chinese": "Anthropic",
+      "category": "org"
+    },
+    {
+      "english": "Claude",
+      "chinese": "Claude",
+      "category": "product"
+    },
+    {
+      "english": "Every",
+      "chinese": "Every",
+      "category": "org"
+    },
+    {
+      "english": "MCP server",
+      "chinese": "MCP 服务器",
+      "category": "tech"
+    },
+    {
+      "english": "vibe coding",
+      "chinese": "感性编程",
+      "category": "concept"
+    },
+    {
+      "english": "SaaS",
+      "chinese": "软件即服务",
+      "category": "tech"
+    },
+    {
+      "english": "Codex",
+      "chinese": "Codex",
+      "category": "product"
+    },
+    {
+      "english": "GPT-5.5",
+      "chinese": "GPT-5.5",
+      "category": "product"
+    },
+    {
+      "english": "Midjourney",
+      "chinese": "Midjourney",
+      "category": "product"
+    },
+    {
+      "english": "Nano Banana",
+      "chinese": "Nano Banana",
+      "category": "product"
+    },
+    {
+      "english": "Dynamic Workflows",
+      "chinese": "动态工作流",
+      "category": "product"
+    }
+  ]
 }

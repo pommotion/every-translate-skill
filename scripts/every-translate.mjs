@@ -1099,6 +1099,62 @@ ${JSON.stringify(factcheck, null, 2)}
   }
 }
 
+async function extractTermsHook(article, drafts, existingGlossary) {
+  const prompt = await readPrompt("extract-terms.md");
+  const existingEnglish = new Set((existingGlossary || []).map((t) => t.english.toLowerCase()));
+  const payload = `原文（${article.title}）：
+${article.text}
+
+翻译稿：
+${drafts.rewrite}
+
+已有术语（不要重复）：
+${JSON.stringify(existingGlossary || [], null, 2)}`;
+
+  try {
+    const result = await callDeepSeek({
+      model: "deepseek-v4-pro",
+      systemPrompt: prompt,
+      userPrompt: payload,
+    });
+    const parsed = parseHookJson(result, "extract-terms");
+    const terms = Array.isArray(parsed?.terms) ? parsed.terms : [];
+    // 去重：只保留 glossary 中没有的
+    const newTerms = terms.filter(
+      (t) => !existingEnglish.has((t.english || "").toLowerCase()),
+    );
+    return newTerms;
+  } catch (error) {
+    console.warn(`[术语提取] extractTerms failed for ${article.title}: ${error.message}`);
+    return [];
+  }
+}
+
+async function saveGlossary(root, terms) {
+  if (!terms || terms.length === 0) return;
+  const glossaryPath = path.join(root, "glossary", "glossary.json");
+  let existing = [];
+  try {
+    const raw = await fs.readFile(glossaryPath, "utf8");
+    const data = JSON.parse(raw);
+    existing = Array.isArray(data?.terms) ? data.terms : [];
+  } catch {
+    // 文件不存在或为空，从头开始
+  }
+  const existingEnglish = new Set(existing.map((t) => (t.english || "").toLowerCase()));
+  const toAdd = terms.filter(
+    (t) => !existingEnglish.has((t.english || "").toLowerCase()),
+  );
+  if (toAdd.length === 0) return;
+  existing.push(...toAdd);
+  await fs.writeFile(
+    glossaryPath,
+    JSON.stringify({ terms: existing }, null, 2) + "\n",
+    "utf8",
+  );
+  console.log(`[名词库] +${toAdd.length} terms → ${glossaryPath} (total: ${existing.length})`);
+}
+
 function articlePromptPayload(article) {
   return `Title: ${article.title}
 Author: ${article.author}
@@ -1259,6 +1315,17 @@ async function processWithDeepSeek(article, model, glossary = []) {
   console.log(
     `[周审稿] score=${drafts.review.score ?? "?"} verdict=${drafts.review.verdict ?? "?"} mustFix=${drafts.review.mustFix?.length || 0}`,
   );
+
+  // 术语提取 hook
+  console.log(`[术语提取] extract terms: ${article.title}`);
+  const newTerms = await extractTermsHook(article, drafts, glossary);
+  console.log(`[术语提取] found ${newTerms.length} new terms`);
+  if (newTerms.length > 0) {
+    drafts.newTerms = newTerms;
+    console.log(
+      `[术语提取] terms: ${newTerms.map((t) => t.english).join(", ")}`,
+    );
+  }
 
   return drafts;
 }
@@ -1468,6 +1535,10 @@ async function commandProcess(args) {
       if (glossary.length) console.log(`Loaded ${glossary.length} glossary terms`);
       const drafts = await processWithDeepSeek(article, args.model, glossary);
       const { filePath, slug } = await writeArticle(args.root, article, drafts, "pending-review");
+      // 名词库自动收录
+      if (drafts.newTerms && drafts.newTerms.length > 0) {
+        await saveGlossary(args.root, drafts.newTerms);
+      }
       if (!args.dryRun) await clearSkipped(args.root, article.url);
       console.log(`Article written: ${path.relative(args.root, filePath)}`);
       results.push({ status: "processed", title: article.title, url: article.url, slug });
