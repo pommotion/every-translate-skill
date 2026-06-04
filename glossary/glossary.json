@@ -1,0 +1,13 @@
+{
+  "version": "2026-06-04",
+  "updatedAt": "2026-06-04T00:00:00.000Z",
+  "source": "remio://📚 Every 翻译名词库",
+  "syncDirection": "remio -> repo (one-way)",
+  "notes": [
+    "权威源：remio 笔记合集「📚 Every 翻译名词库」",
+    "本文件是镜像，由 scripts/sync-glossary.mjs（待 P2 实现）从 remio 同步生成",
+    "手工编辑本文件不会反向写到 remio（单向同步）",
+    "P1 阶段：terms 数组保持为空，由真实翻译驱动收录"
+  ],
+  "terms": []
+}

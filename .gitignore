@@ -1,0 +1,40 @@
+# 编辑器 & OS
+.DS_Store
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Node
+node_modules/
+*.log
+npm-debug.log*
+.npm/
+
+# 临时文件
+processing/pending/
+data/preflight-results.json
+data/check-results.json
+data/process-results.json
+
+# 草稿文章（待审状态，不进 git）
+content/articles/_draft/
+content/articles/*.draft.md
+
+# 名词库本地缓存
+glossary/.cache/
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 凭据（绝不能进 git）
+config/credentials.json
+*.key
+*.pem
+
+# 缓存 & 本地数据
+.cache/
+config.json

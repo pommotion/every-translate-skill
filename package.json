@@ -1,0 +1,22 @@
+{
+  "name": "every-translate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "独立翻译 skill：从 every.to 文章生成带事实核查和终审的中文草稿",
+  "type": "module",
+  "bin": {
+    "every-translate": "./scripts/every-translate.mjs"
+  },
+  "scripts": {
+    "preflight": "node scripts/every-translate.mjs preflight",
+    "check": "node scripts/every-translate.mjs check",
+    "process": "node scripts/every-translate.mjs process",
+    "glossary:sync": "node scripts/sync-glossary.mjs"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
