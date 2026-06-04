@@ -85,18 +85,9 @@ node ~/.agents/skills/every-translate/scripts/every-translate.mjs process \
 | remio 笔记合集「📚 Every 翻译名词库」 | **权威源**，手工编辑 | ✅ |
 | `glossary/glossary.json`（仓库内） | **镜像**，脚本读取 | ← 来自 remio 同步 |
 
-**schema**：
+**同步流程**：翻译完成后 → `extractTermsHook` 提取术语 → `saveGlossary` 写 glossary.json → agent 调 `update_note` 同步到 remio 合集
 
-```json
-{
-  "version": "2026-06-04",
-  "updatedAt": "2026-06-04T09:30:00Z",
-  "terms": [
-    { "en": "AI Agent", "zh": "智能体", "context": "通用", "note": "" },
-    { "en": "Singularity", "zh": "技术奇点", "context": "AI/未来学", "note": "不要简译为'奇点'" }
-  ]
-}
-```
+**remio 合集 ID**：`mpzgcn4dclkdayo43gm`
 
 ## 迁移自 every-newsletter-pipeline
 
@@ -117,8 +108,13 @@ skill 模式不接 scheduler（用户明确："skill 处理需要快速出结果
 ## 实施进度
 
 - [x] **P1 Stage 1** — 建骨架、复制核心、看 CLI 代码
-- [ ] **P1 Stage 2** — 删 publish、加吴查查/周审稿 hook
-- [ ] **P1 Stage 3** — 加 glossary.json + remio 同步脚本
-- [ ] **P1 Stage 4** — 用 Opus 4.8 跑通，对比老 skill 质量
-- [ ] **P1 Stage 5** — git init + commit + push 到 GitHub
-- [ ] **P2** — 等待 aApp 设计
+- [x] **P1 Stage 2** — 删 publish、加吴查查/周审稿 hook
+- [x] **P1 Stage 3** — 加 glossary.json + remio 同步脚本
+- [x] **P1 Stage 4A** — 静态验证（undici@5 + CLI --help）
+- [x] **P1 Stage 4B** — 端到端跑通（Opus 4.8 文章：4553 字，吴查查 100 分，周审稿 86 分）
+- [x] **P1 Stage 5** — git init + commit + push GitHub
+- [x] **P2-1** — 名词库自动收录（extractTermsHook + glossary 0→15 术语）
+- [x] **P2-2** — remio 名词库合集创建
+- [ ] **P2-3** — SOCKS5 proxy 支持
+- [ ] **P3** — aApp 骨架
+- [ ] **P4** — scheduler + 新网站
